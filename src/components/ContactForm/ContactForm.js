@@ -26,6 +26,18 @@ function ContactForm() {
         return;
     }
   };
+  const isNumber = number => {
+    const check = /^[-+]?[0-9]+$/;
+    if(number.search(check)) {
+    return true;
+    };
+  };
+  const isName = name => {
+    const check = /^[A-Za-z]+$/;
+    if(name.search(check)) {
+    return true;
+    };
+  };
   const isNameExist = name => {
     return contacts.find(
       contact => contact.name.toLowerCase() === name.toLowerCase(),
@@ -38,6 +50,24 @@ function ContactForm() {
   const isQueryEmpty = (name, number) => {
     return name.trim() === '' || number.trim() === '';
   };
+  
+  const onKeyNumber = e => {
+    e = (e) ? e : window.event;
+    const charCode = (e.which) ? e.which : e.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+      return toast.warning('Please input numbers only');
+    }
+    return true;
+  };
+
+  const onKeyLetter = e => {
+    e = (e) ? e : window.event;
+    const charCode  = (e.which) ? e.which : e.keyCode;
+    if ((charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 123) && (charCode !== 32)) {
+      return toast.warning('Please input letters only');
+    }
+    return true;
+  };
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -45,12 +75,16 @@ function ContactForm() {
       toast.warning('This name is already exist');
     } else if (isNumberExist(number)) {
       toast.warning('This number is already exist');
+    } else if (isName(name) === true) {
+      toast.error('Only letters allowed');
+    } else if (isNumber(number) === true) {
+      toast.error('Only numbers allowed');  
     } else if (isQueryEmpty(name, number)) {
       toast.error('Some fields are empty');
     } else {
       dispatch(addContact(name, number));
     }
-    resetForm();
+    resetForm();  
   };
 
   const resetForm = () => {
@@ -69,6 +103,7 @@ function ContactForm() {
           value={name}
           onChange={handleChange}
           className={s.input}
+          onKeyPress={onKeyLetter} 
         />
       </label>
       <label className={s.label}>
@@ -80,6 +115,7 @@ function ContactForm() {
           value={number}
           onChange={handleChange}
           className={s.input}
+          onKeyPress={onKeyNumber} 
         />
       </label>
       <button type="submit" className={s.button}>
